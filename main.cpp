@@ -11,6 +11,7 @@
 #include "PointCloudViewer.h"
 #include <iomanip>
 #include "OBBFittingProcessor.h"
+#include "StatisticalOutlierRemovalProcessor.h"  
 #include <map>
 #include <vector>
 #include <pcl/console/print.h>
@@ -77,21 +78,27 @@ int main(int argc, char **argv)
     std::cout << "去除地面後點雲數量: " << groundRemovedCloud->size()
               << " (算法耗時: " << std::fixed << std::setprecision(2) << groundResult.runtime_ms << " ms)" << std::endl;
 
+    // 使用統計濾波器移除離群點
+    auto filteredCloud = StatisticalOutlierRemovalProcessor::removeOutliers(groundRemovedCloud, 50, 1.0);
+    std::cout << "統計濾波後點雲數量: " << filteredCloud->size() << std::endl;
+    
+
     // 進行聚類處理 (根據 --cluster 參數)
     pcl::PointCloud<pcl::PointXYZI>::Ptr clusteredCloud;
     if (clusterMethod == "euclidean")
     {
-        auto clusteringResult = EuclideanClusterProcessor::clusterCloud(groundRemovedCloud, 0.5); // clusterTolerance
+        auto clusteringResult = EuclideanClusterProcessor::clusterCloud(filteredCloud, 0.5); // clusterTolerance
         std::cout << "Euclidean Cluster 後點雲數量: " << clusteringResult.cloud->size()
                   << " (算法耗時: " << std::fixed << std::setprecision(2) << clusteringResult.runtime_ms << " ms)" << std::endl;
         clusteredCloud = clusteringResult.cloud;
     }    
     else if (clusterMethod == "dbscan")
-    {
-        auto clusteringResult = DBSCANClusteringProcessor::clusterCloud(groundRemovedCloud, 0.7,7); // eps, minPts
+    {   
+        auto clusteringResult = DBSCANClusteringProcessor::clusterCloud(filteredCloud, 0.8,7); // eps, minPts
         std::cout << "DBSCAN Cluster 後點雲數量: " << clusteringResult.cloud->size()
                   << " (算法耗時: " << std::fixed << std::setprecision(2) << clusteringResult.runtime_ms << " ms)" << std::endl;
         clusteredCloud = clusteringResult.cloud;
+
     }
     else
     {
@@ -121,7 +128,7 @@ int main(int argc, char **argv)
     for (const auto &cluster : clusterMap)
     {
         int clusterLabel = cluster.first;
-        OrientedBoundingBox obb = OBBFittingProcessor::computeOBB(cluster.second);   
+        OrientedBoundingBox obb = OBBFittingProcessor::computeOBB(cluster.second);
         validOBB.push_back(obb);
     }
     /* 

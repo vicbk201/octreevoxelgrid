@@ -46,7 +46,56 @@ void PointCloudViewer::displayProcessedCloud(
         viewer->setShapeRenderingProperties(
             pcl::visualization::PCL_VISUALIZER_COLOR, 1.0, 1.0, 1.0, cubeId.str());
             
-        /*
+        // ------------------------------------------------------------
+    // (A) 在該 OBB 周圍畫出 X/Y/Z 三個方向的箭頭
+    // ------------------------------------------------------------
+    // 1) 先把 OBB 的 quaternion 轉成 3x3 旋轉矩陣
+    Eigen::Matrix3f rotMat = obb.orientation.toRotationMatrix();
+
+    // 2) 分別取出三個軸 (X, Y, Z)
+    //    這些向量是在世界座標系下的方向
+    Eigen::Vector3f xAxis = rotMat.col(0); // X
+    Eigen::Vector3f yAxis = rotMat.col(1); // Y
+    Eigen::Vector3f zAxis = rotMat.col(2); // Z
+
+    // 3) 設定「畫箭頭」的大小 (scale)
+    float axisScale = 4.0f; // 您可依場景大小調整
+    // OBB 的中心
+    pcl::PointXYZ centerPt(obb.center.x(), obb.center.y(), obb.center.z());
+
+    // X 軸終點
+    pcl::PointXYZ xEnd(
+        obb.center.x() + axisScale * xAxis.x(),
+        obb.center.y() + axisScale * xAxis.y(),
+        obb.center.z() + axisScale * xAxis.z()
+    );
+    // Y 軸終點
+    pcl::PointXYZ yEnd(
+        obb.center.x() + axisScale * yAxis.x(),
+        obb.center.y() + axisScale * yAxis.y(),
+        obb.center.z() + axisScale * yAxis.z()
+    );
+    // Z 軸終點
+    pcl::PointXYZ zEnd(
+        obb.center.x() + axisScale * zAxis.x(),
+        obb.center.y() + axisScale * zAxis.y(),
+        obb.center.z() + axisScale * zAxis.z()
+    );
+
+    // 4) 加到 viewer 裏：使用 addArrow( end, start, r, g, b, "id" )
+    //    - 這裡以紅(X)綠(Y)藍(Z) 顏色顯示
+    {
+        std::stringstream ssx; ssx << "arrow_x_" << i;
+        viewer->addArrow(xEnd, centerPt, 1.0, 0.0, 0.0, false, ssx.str()); // 紅色 (X)
+
+        std::stringstream ssy; ssy << "arrow_y_" << i;
+        viewer->addArrow(yEnd, centerPt, 0.0, 1.0, 0.0, false, ssy.str()); // 綠色 (Y)
+
+        std::stringstream ssz; ssz << "arrow_z_" << i;
+        viewer->addArrow(zEnd, centerPt, 0.0, 0.0, 1.0, false, ssz.str()); // 藍色 (Z)
+    }
+        
+    /*
         // 建立文字內容：尺寸資訊
         char text[100];
         float length = std::fabs(obb.dimensions.x());
@@ -82,7 +131,9 @@ void PointCloudViewer::displayProcessedCloud(
             // 設定 follower 的攝影機（以確保文字面向攝影機）
             textActor->SetCamera(renderer->GetActiveCamera());
         }
-        */
+
+    */   
+        
     }
 
     // 顯示座標系統並初始化攝影機參數

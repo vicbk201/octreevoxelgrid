@@ -6,7 +6,7 @@
 bool ArgumentParser::parseArguments(int argc, char** argv, std::string& cloudFile, float& resolution, std::string& method, std::string& outputCloudFile)
 {
     // 設定預設解析度
-    resolution = 0.2f;
+    resolution = 0.1f;
     // 清空 method，要求使用者必須輸入
     method = "";
     // 預設 outputCloudFile 為空字串（表示不儲存輸出點雲）

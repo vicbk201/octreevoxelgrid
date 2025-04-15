@@ -21,6 +21,7 @@ add_executable(app
     src/OctreeProcessor.cpp
     src/VoxelGridProcessor.cpp
     src/PointCloudViewer.cpp
+    src/BackgroundRemovalProcessor.cpp
 )
 
 target_link_libraries(app ${PCL_LIBRARIES} ${VTK_LIBRARIES})

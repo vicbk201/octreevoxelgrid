@@ -27,6 +27,7 @@ int main(int argc, char** argv)
     std::cout << "PCD File: " << cloudFile << std::endl;
     std::cout << "Method: " << method << std::endl;
     std::cout << "Resolution: " << resolution << std::endl;
+
     /*
     auto cloud = PCDLoader::loadPCD(cloudFile);
     if (!cloud || cloud->empty()) {
@@ -34,8 +35,7 @@ int main(int argc, char** argv)
         return -1;
     }
     std::cout << "原始點雲數量: " << cloud->size() << std::endl;
-    */ 
-
+    */
     //載入資料
     auto raw_input = PCDLoader::loadPCD(cloudFile);
     auto raw_background = PCDLoader::loadPCD("/home/semilux/Documents/fortsense_test_pcd/background/4084-563116000.pcd");
@@ -56,6 +56,7 @@ int main(int argc, char** argv)
     {
         cloud = BackgroundRemovalProcessor::removeBackgroundByOctree(raw_input, raw_background, background_resolution);
     }
+    
 
     // 選擇下採樣方法
     pcl::PointCloud<pcl::PointXYZ>::Ptr downsampledCloud;
